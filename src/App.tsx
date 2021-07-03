@@ -16,13 +16,13 @@ const ranges: Range[] = [
     value: 67,
     unit: '%',
   },
-  {
-    label: 'Proportional Label',
-    max: 1,
-    min: 0,
-    step: 0.01,
-    value: 0.33,
-  },
+  // {
+  //   label: 'Proportional Label',
+  //   max: 1,
+  //   min: 0,
+  //   step: 0.01,
+  //   value: 0.33,
+  // },
 ]
 
 // An array of results updated by the sliders components on move
@@ -51,8 +51,7 @@ export default function App() {
   return (
     <div className="App">
       <div className="challenge">
-        <Slider />
-        {/* <Card> d
+        <Card>
           {ranges.map((data, index) => (
             <Slider
               key={index}
@@ -60,7 +59,7 @@ export default function App() {
               onChange={(value) => handleChange(value, index)}
             />
           ))}
-        </Card> */}
+        </Card>
 
         <Card title="Results">
           {results.map(({ label, value, unit }, index) => (

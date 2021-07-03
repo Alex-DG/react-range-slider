@@ -4,9 +4,14 @@ import { getPercentage, getLeft } from '../utils/calc'
 type SliderParams = {
   sliderRef: React.RefObject<HTMLDivElement> | null
   thumbRef: React.RefObject<HTMLDivElement> | null
+  value: number
+  max: number
 }
 
-const useSlider = ({ sliderRef, thumbRef }: SliderParams) => {
+const useSlider = ({ sliderRef, thumbRef, value, max }: SliderParams) => {
+  const initialPercentage = getPercentage(value, max)
+  const initialValue = getLeft(initialPercentage)
+
   let diff = useRef<number>(0)
 
   const handleMouseMove = ({ clientX }: MouseEvent) => {
@@ -52,7 +57,7 @@ const useSlider = ({ sliderRef, thumbRef }: SliderParams) => {
     }
   }
 
-  return { start, stop }
+  return { start, stop, initialValue }
 }
 
 export default useSlider
