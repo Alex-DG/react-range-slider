@@ -1,56 +1,77 @@
-import { formatValue } from './../utils/format'
-import React, { useRef, useEffect, useCallback } from 'react'
-import { getPercentage, getLeft } from '../utils/calc'
+import React, { useRef, useCallback, useLayoutEffect } from 'react'
 
-type SliderParams = {
+import { formatValue } from '../utils/format'
+import { getPercentage, getLeft, getWidth, getValue } from '../utils/calc'
+
+type Props = {
   currentRef: React.RefObject<HTMLDivElement> | null
-  sliderRef: React.RefObject<HTMLDivElement> | null
+  rangeProgressRef: React.RefObject<HTMLDivElement> | null
+  rangeRef: React.RefObject<HTMLDivElement> | null
   thumbRef: React.RefObject<HTMLDivElement> | null
   onChange: (value: number) => void
-  value: number
+  min: number
   max: number
+  value: number
 }
 
 const useSlider = ({
   currentRef,
-  sliderRef,
+  rangeProgressRef,
+  rangeRef,
   thumbRef,
-  value,
-  max,
   onChange,
-}: SliderParams) => {
-  const initialPercentage = getPercentage(value, max)
+  min,
+  max,
+  value,
+}: Props) => {
+  const initialPercentage = getPercentage(value, min, max)
+  const initialValue = getValue(initialPercentage, min, max)
 
   let diff = useRef<number>(0)
 
-  // Update UI
-  const handleChange = useCallback(
-    (newValue: number) => {
-      if (currentRef?.current)
-        currentRef.current.innerHTML = formatValue(newValue)
-      onChange(newValue)
+  const update = useCallback(
+    (value: number, percentage: number) => {
+      if (
+        thumbRef?.current &&
+        currentRef?.current &&
+        rangeProgressRef?.current
+      ) {
+        thumbRef.current.style.left = getLeft(percentage)
+        rangeProgressRef.current.style.width = getWidth(percentage)
+        currentRef.current.textContent = formatValue(value)
+      }
     },
-    [currentRef, onChange],
+    [currentRef, rangeProgressRef, thumbRef],
+  )
+
+  // Callback with new result to parent on move
+  const handleChange = useCallback(
+    (value: number) => onChange(Number(formatValue(value))),
+    [onChange],
   )
 
   const handleMouseMove = ({ clientX }: MouseEvent) => {
-    if (sliderRef?.current && thumbRef?.current) {
+    if (
+      rangeRef?.current &&
+      thumbRef?.current &&
+      currentRef?.current &&
+      rangeProgressRef?.current
+    ) {
       // calculate the new position of the thumb on the x axis based on the mouse move event new client x
       let newX =
-        clientX -
-        diff.current -
-        sliderRef?.current?.getBoundingClientRect().left
+        clientX - diff.current - rangeRef?.current?.getBoundingClientRect().left
 
-      const start = 0 // range start
-      const end = sliderRef.current.offsetWidth - thumbRef.current.offsetWidth // range end
+      const start = min // range start
+      const end = rangeRef.current.offsetWidth - thumbRef.current.offsetWidth // range end
 
       if (newX < start) newX = start
       if (newX > end) newX = end
 
-      const newPercentage = getPercentage(newX, end)
-      thumbRef.current.style.left = getLeft(newPercentage)
+      const newPercentage = getPercentage(newX, start, end)
+      const newValue = getValue(newPercentage, min, max)
 
-      handleChange(newPercentage)
+      update(newValue, newPercentage)
+      handleChange(newValue)
     }
   }
 
@@ -78,14 +99,12 @@ const useSlider = ({
     }
   }
 
-  useEffect(() => {
-    // Set initial value
-    if (initialPercentage && thumbRef?.current) {
-      thumbRef.current.style.left = getLeft(initialPercentage)
-    }
-  }, [initialPercentage, thumbRef])
+  useLayoutEffect(
+    () => update(initialValue, initialPercentage),
+    [initialValue, initialPercentage, update],
+  )
 
-  return { start, stop }
+  return { start, stop, update }
 }
 
 export default useSlider

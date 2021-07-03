@@ -1,7 +1,9 @@
 import React, { useRef } from 'react'
 
-import useSlider from '../../config/hooks/useSlider'
 import { Range } from '../../config/types'
+import { formatValue } from '../../config/utils/format'
+
+import useSlider from '../../config/hooks/useSlider'
 
 import './styles.css'
 
@@ -21,19 +23,23 @@ const Slider = ({
   unit = '',
   onChange,
 }: Props) => {
+  // UI refs
   const currentRef = useRef<HTMLDivElement>(null)
-  const sliderRef = useRef<HTMLDivElement>(null)
+  const rangeRef = useRef<HTMLDivElement>(null)
+  const rangeProgressRef = useRef<HTMLDivElement>(null)
   const thumbRef = useRef<HTMLDivElement>(null)
 
+  // Slider Hook
   const { start } = useSlider({
     currentRef,
-    sliderRef,
+    rangeProgressRef,
+    rangeRef,
     thumbRef,
-    value,
-    max,
     onChange,
+    min,
+    max,
+    value,
   })
-  // console.log({ newValue })
 
   // Slider entry point
   const handleMouseDown = ({ clientX }: React.MouseEvent<HTMLDivElement>) => {
@@ -43,11 +49,15 @@ const Slider = ({
   return (
     <>
       <div className="header">
-        <strong ref={currentRef}>{value}</strong>
-        &nbsp;/&nbsp;
-        {max}
+        <div>{min}</div>
+        <div>
+          <strong ref={currentRef}>{formatValue(value)}</strong>
+          &nbsp;/&nbsp;
+          {formatValue(max)}
+        </div>
       </div>
-      <div ref={sliderRef} className="slider">
+      <div ref={rangeRef} className="range">
+        <div className="range-progress" ref={rangeProgressRef} />
         <div ref={thumbRef} className="thumb" onMouseDown={handleMouseDown} />
       </div>
     </>
