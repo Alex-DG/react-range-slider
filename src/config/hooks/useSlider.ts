@@ -1,18 +1,37 @@
-import React, { useRef } from 'react'
+import { formatValue } from './../utils/format'
+import React, { useRef, useEffect, useCallback } from 'react'
 import { getPercentage, getLeft } from '../utils/calc'
 
 type SliderParams = {
+  currentRef: React.RefObject<HTMLDivElement> | null
   sliderRef: React.RefObject<HTMLDivElement> | null
   thumbRef: React.RefObject<HTMLDivElement> | null
+  onChange: (value: number) => void
   value: number
   max: number
 }
 
-const useSlider = ({ sliderRef, thumbRef, value, max }: SliderParams) => {
+const useSlider = ({
+  currentRef,
+  sliderRef,
+  thumbRef,
+  value,
+  max,
+  onChange,
+}: SliderParams) => {
   const initialPercentage = getPercentage(value, max)
-  const initialValue = getLeft(initialPercentage)
 
   let diff = useRef<number>(0)
+
+  // Update UI
+  const handleChange = useCallback(
+    (newValue: number) => {
+      if (currentRef?.current)
+        currentRef.current.innerHTML = formatValue(newValue)
+      onChange(newValue)
+    },
+    [currentRef, onChange],
+  )
 
   const handleMouseMove = ({ clientX }: MouseEvent) => {
     if (sliderRef?.current && thumbRef?.current) {
@@ -30,6 +49,8 @@ const useSlider = ({ sliderRef, thumbRef, value, max }: SliderParams) => {
 
       const newPercentage = getPercentage(newX, end)
       thumbRef.current.style.left = getLeft(newPercentage)
+
+      handleChange(newPercentage)
     }
   }
 
@@ -57,7 +78,14 @@ const useSlider = ({ sliderRef, thumbRef, value, max }: SliderParams) => {
     }
   }
 
-  return { start, stop, initialValue }
+  useEffect(() => {
+    // Set initial value
+    if (initialPercentage && thumbRef?.current) {
+      thumbRef.current.style.left = getLeft(initialPercentage)
+    }
+  }, [initialPercentage, thumbRef])
+
+  return { start, stop }
 }
 
 export default useSlider

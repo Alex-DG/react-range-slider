@@ -5,6 +5,7 @@ import Slider from './components/Slider'
 import Card from './components/Card'
 
 import { Range, Result } from './config/types'
+import { formatValue } from './config/utils/format'
 
 // An array of range we want to use through some slider components
 const ranges: Range[] = [
@@ -41,7 +42,8 @@ export default function App() {
    */
   const handleChange = (value: number, updateAt: number) => {
     const newResults = results.map((result, index) => {
-      if (index === updateAt) return { ...result, value }
+      if (index === updateAt)
+        return { ...result, value: Number(formatValue(value)) }
       return result
     })
 

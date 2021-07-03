@@ -21,10 +21,19 @@ const Slider = ({
   unit = '',
   onChange,
 }: Props) => {
+  const currentRef = useRef<HTMLDivElement>(null)
   const sliderRef = useRef<HTMLDivElement>(null)
   const thumbRef = useRef<HTMLDivElement>(null)
 
-  const { start, initialValue } = useSlider({ sliderRef, thumbRef, value, max })
+  const { start } = useSlider({
+    currentRef,
+    sliderRef,
+    thumbRef,
+    value,
+    max,
+    onChange,
+  })
+  // console.log({ newValue })
 
   // Slider entry point
   const handleMouseDown = ({ clientX }: React.MouseEvent<HTMLDivElement>) => {
@@ -32,14 +41,16 @@ const Slider = ({
   }
 
   return (
-    <div ref={sliderRef} className="slider">
-      <div
-        ref={thumbRef}
-        className="thumb"
-        style={{ left: initialValue }}
-        onMouseDown={handleMouseDown}
-      />
-    </div>
+    <>
+      <div className="header">
+        <strong ref={currentRef}>{value}</strong>
+        &nbsp;/&nbsp;
+        {max}
+      </div>
+      <div ref={sliderRef} className="slider">
+        <div ref={thumbRef} className="thumb" onMouseDown={handleMouseDown} />
+      </div>
+    </>
   )
 }
 
