@@ -1,7 +1,7 @@
-import { useRef } from 'react'
+import React, { useRef } from 'react'
 import { getPercentage, getLeft } from '../utils/calc'
 
-interface SliderParams {
+type SliderParams = {
   sliderRef: React.RefObject<HTMLDivElement> | null
   thumbRef: React.RefObject<HTMLDivElement> | null
 }

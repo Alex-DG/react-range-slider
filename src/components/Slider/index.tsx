@@ -8,10 +8,10 @@ import './styles.css'
  * Horizontal Range Slider
  */
 const Slider = () => {
-  const sliderRef = React.useRef<HTMLDivElement>(null)
-  const thumbRef = React.useRef<HTMLDivElement>(null)
+  const sliderRef = useRef<HTMLDivElement>(null)
+  const thumbRef = useRef<HTMLDivElement>(null)
 
-  const { start, stop } = useSlider({ sliderRef, thumbRef })
+  const { start } = useSlider({ sliderRef, thumbRef })
 
   // Slider entry point
   const handleMouseDown = ({ clientX }: React.MouseEvent<HTMLDivElement>) => {
