@@ -5,6 +5,7 @@ import Slider from './components/Slider'
 import Card from './components/Card'
 
 import { Range, Result } from './config/types'
+import { formatValue } from './config/utils/format'
 
 // An array of range we want to use through some slider components
 const ranges: Range[] = [
@@ -16,19 +17,21 @@ const ranges: Range[] = [
     value: 67,
     unit: '%',
   },
-  // {
-  //   label: 'Proportional Label',
-  //   max: 1,
-  //   min: 0,
-  //   step: 0.01,
-  //   value: 0.33,
-  // },
+  {
+    label: 'Proportional Label',
+    max: 1,
+    min: 0,
+    step: 0.01,
+    value: 0.33,
+  },
 ]
 
 // An array of results updated by the sliders components on move
-const defaultResults: Result[] = ranges.map(({ label, value, unit = '' }) => {
-  return { label, value, unit }
-})
+const defaultResults: Result[] = ranges.map(
+  ({ label, value, unit = '', step }) => {
+    return { label, value, unit, step }
+  },
+)
 
 export default function App() {
   const [results, setResults] = React.useState<Result[]>(defaultResults)
@@ -62,11 +65,11 @@ export default function App() {
         </Card>
 
         <Card title="Results">
-          {results.map(({ label, value, unit }, index) => (
+          {results.map(({ label, value, unit, step }, index) => (
             <p key={index}>
               <span>{label}:</span>{' '}
               <strong>
-                {value}
+                {formatValue(value)}
                 {unit}
               </strong>
             </p>

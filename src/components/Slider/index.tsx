@@ -9,6 +9,7 @@ import './styles.css'
 
 interface Props extends Range {
   onChange(value: number): void
+  show?: boolean
 }
 
 /**
@@ -22,6 +23,7 @@ const Slider = ({
   value,
   unit = '',
   onChange,
+  show,
 }: Props) => {
   // UI refs
   const currentRef = useRef<HTMLDivElement>(null)
@@ -38,6 +40,7 @@ const Slider = ({
     onChange,
     min,
     max,
+    step,
     value,
   })
 
@@ -47,20 +50,25 @@ const Slider = ({
   }
 
   return (
-    <>
-      <div className="header">
-        <div>{min}</div>
-        <div>
-          <strong ref={currentRef}>{formatValue(value)}</strong>
-          &nbsp;/&nbsp;
-          {formatValue(max)}
+    <div>
+      <label className="label">{label}</label>
+
+      {show && (
+        <div className="header">
+          <span>{min}</span>
+          <span>{formatValue(max)}</span>
         </div>
-      </div>
+      )}
+
       <div ref={rangeRef} className="range">
         <div className="range-progress" ref={rangeProgressRef} />
-        <div ref={thumbRef} className="thumb" onMouseDown={handleMouseDown} />
+
+        <div ref={thumbRef} className="thumb" onMouseDown={handleMouseDown}>
+          <span ref={currentRef}>{formatValue(value)}</span>
+          {unit && <span>{unit}</span>}
+        </div>
       </div>
-    </>
+    </div>
   )
 }
 

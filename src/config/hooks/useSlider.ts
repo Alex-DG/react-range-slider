@@ -1,7 +1,7 @@
 import React, { useRef, useCallback, useLayoutEffect } from 'react'
 
 import { formatValue } from '../utils/format'
-import { getPercentage, getLeft, getWidth, getValue } from '../utils/calc'
+import { getPercentage, getWidth, getValue } from '../utils/calc'
 
 type Props = {
   currentRef: React.RefObject<HTMLDivElement> | null
@@ -12,6 +12,7 @@ type Props = {
   min: number
   max: number
   value: number
+  step: number
 }
 
 const useSlider = ({
@@ -23,25 +24,23 @@ const useSlider = ({
   min,
   max,
   value,
+  step,
 }: Props) => {
-  const initialPercentage = getPercentage(value, min, max)
-  const initialValue = getValue(initialPercentage, min, max)
-
   let diff = useRef<number>(0)
 
   const update = useCallback(
-    (value: number, percentage: number) => {
+    (position: number, value: number) => {
       if (
         thumbRef?.current &&
         currentRef?.current &&
         rangeProgressRef?.current
       ) {
-        thumbRef.current.style.left = getLeft(percentage)
-        rangeProgressRef.current.style.width = getWidth(percentage)
+        thumbRef.current.style.left = `${position}px`
+        rangeProgressRef.current.style.width = getWidth(value, max)
         currentRef.current.textContent = formatValue(value)
       }
     },
-    [currentRef, rangeProgressRef, thumbRef],
+    [currentRef, rangeProgressRef, thumbRef, max],
   )
 
   // Callback with new result to parent on move
@@ -57,20 +56,33 @@ const useSlider = ({
       currentRef?.current &&
       rangeProgressRef?.current
     ) {
-      // calculate the new position of the thumb on the x axis based on the mouse move event new client x
+      const start = min
+      const rangeMax =
+        rangeRef.current.offsetWidth - thumbRef.current.offsetWidth // max available width to move on: includes borders
+
+      const thumbDistanceTraveled = clientX - diff.current
+
+      // calculate the new thumb position n the x axis based on the mouse move event new client x
       let newX =
-        clientX - diff.current - rangeRef?.current?.getBoundingClientRect().left
+        thumbDistanceTraveled - rangeRef.current.getBoundingClientRect().left
 
-      const start = min // range start
-      const end = rangeRef.current.offsetWidth - thumbRef.current.offsetWidth // range end
+      let coeff = 0
 
-      if (newX < start) newX = start
-      if (newX > end) newX = end
+      // Check if thumb is out of the range when:
+      if (newX < start) {
+        coeff = min
+        newX = min // left
+      }
 
-      const newPercentage = getPercentage(newX, start, end)
-      const newValue = getValue(newPercentage, min, max)
+      if (newX > rangeMax) newX = rangeMax // right
 
-      update(newValue, newPercentage)
+      const newPercentage = getPercentage(newX, start, rangeMax) // convert current position to range percentage based on range min/max (= dom values)
+      const newValue = getValue(newPercentage, min, max, step)
+
+      const correctedPosition = newX - coeff - 1 // correction to fit nicely in the very left side of the range when value is 0
+
+      // Update slider on move
+      update(correctedPosition, newValue)
       handleChange(newValue)
     }
   }
@@ -99,10 +111,18 @@ const useSlider = ({
     }
   }
 
-  useLayoutEffect(
-    () => update(initialValue, initialPercentage),
-    [initialValue, initialPercentage, update],
-  )
+  useLayoutEffect(() => {
+    if (thumbRef?.current && rangeRef?.current) {
+      const initialValue = Number.isInteger(value) ? value : value * 100
+
+      const rangeMax =
+        rangeRef.current.offsetWidth - thumbRef.current.offsetWidth
+
+      const initialPosition = getValue(initialValue, min, rangeMax, step) - 1
+
+      update(initialPosition, value)
+    }
+  }, [min, rangeRef, thumbRef, update, value, step])
 
   return { start, stop, update }
 }

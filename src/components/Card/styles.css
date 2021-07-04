@@ -3,11 +3,18 @@
   max-width: 360px;
 
   height: min-content;
-  padding: 1em 1em 0.5em;
+  padding: 1em 1em 1.5em;
 
   background-color: #fff;
 
   border: 1px solide #eee;
 
   box-shadow: 0 4px 8px 0 rgb(0 0 0 / 10%), 0 6px 10px 0 rgb(0 0 0 / 15%);
+}
+
+.container > .children {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 1.5em;
 }
