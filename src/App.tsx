@@ -54,7 +54,7 @@ export default function App() {
   return (
     <div className="App">
       <div className="challenge">
-        <Card>
+        <Card space>
           {ranges.map((data, index) => (
             <Slider
               key={index}
