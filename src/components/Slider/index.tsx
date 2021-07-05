@@ -32,7 +32,7 @@ const Slider = ({
   const thumbRef = useRef<HTMLDivElement>(null)
 
   // Slider Hook
-  const { start } = useSlider({
+  const { start, onClickRange } = useSlider({
     currentRef,
     rangeProgressRef,
     rangeRef,
@@ -44,9 +44,14 @@ const Slider = ({
     value,
   })
 
-  // Slider entry point
+  // On selecting the thumb
   const handleMouseDown = ({ clientX }: React.MouseEvent<HTMLDivElement>) => {
     start(clientX)
+  }
+
+  // On click on range
+  const handleClick = ({ clientX }: React.MouseEvent<HTMLDivElement>) => {
+    onClickRange(clientX)
   }
 
   return (
@@ -60,7 +65,7 @@ const Slider = ({
         </div>
       )}
 
-      <div ref={rangeRef} className="range">
+      <div ref={rangeRef} className="range" onClick={handleClick}>
         <div className="range-progress" ref={rangeProgressRef} />
 
         <div ref={thumbRef} className="thumb" onMouseDown={handleMouseDown}>

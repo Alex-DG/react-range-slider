@@ -49,7 +49,10 @@ const useSlider = ({
     [onChange],
   )
 
-  const handleMouseMove = ({ clientX }: MouseEvent) => {
+  const getPosition = (clientX: number) => {
+    let correctedPosition = 0
+    let newValue = 0
+
     if (
       rangeRef?.current &&
       thumbRef?.current &&
@@ -77,14 +80,28 @@ const useSlider = ({
       if (newX > rangeMax) newX = rangeMax // right
 
       const newPercentage = getPercentage(newX, start, rangeMax) // convert current position to range percentage based on range min/max (= dom values)
-      const newValue = getValue(newPercentage, min, max, step)
+      newValue = getValue(newPercentage, min, max, step)
 
-      const correctedPosition = newX - coeff - 1 // correction to fit nicely in the very left side of the range when value is 0
-
-      // Update slider on move
-      update(correctedPosition, newValue)
-      handleChange(newValue)
+      correctedPosition = newX - coeff - 1 // correction to fit nicely in the very left side of the range when value is 0
     }
+
+    return { correctedPosition, newValue }
+  }
+
+  const onClickRange = (clientX: number) => {
+    const { correctedPosition, newValue } = getPosition(clientX)
+
+    // Update slider on move
+    update(correctedPosition, newValue)
+    handleChange(newValue)
+  }
+
+  const handleMouseMove = ({ clientX }: MouseEvent) => {
+    const { correctedPosition, newValue } = getPosition(clientX)
+
+    // Update slider on move
+    update(correctedPosition, newValue)
+    handleChange(newValue)
   }
 
   /**
@@ -122,9 +139,12 @@ const useSlider = ({
 
       update(initialPosition, value)
     }
+
+    // return () =>
+    //   rangeRef?.current?.removeEventListener('click', handleRangeClick)
   }, [min, rangeRef, thumbRef, update, value, step])
 
-  return { start, stop, update }
+  return { start, stop, update, onClickRange }
 }
 
 export default useSlider
